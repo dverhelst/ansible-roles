@@ -1,0 +1,16 @@
+---
+- name: install python-pycurl for apt-repository
+  apt: name=python-pycurl state=installed
+  sudo: True
+
+- name: add spotify repo
+  apt_repository: repo='deb http://repository.spotify.com stable non-free' state=present update_cache=yes
+  sudo: True
+
+- name: import spotify-repo-key
+  shell: apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 94558F59
+  sudo: True
+
+- name: install spotify
+  apt: name=spotify-client state=latest update_cache=yes
+  sudo: True

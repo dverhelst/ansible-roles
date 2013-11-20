@@ -1,0 +1,8 @@
+- name: set up WM to i3
+  hosts: desktops
+  user: dieter
+
+  roles:
+    #- awesome
+    - i3
+    - spotify

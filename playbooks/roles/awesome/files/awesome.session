@@ -1,0 +1,5 @@
+[GNOME Session]
+Name=Awesome Unity-2D Desktop
+RequiredComponents=gnome-settings-daemon;gnome-sound-applet;nm-applet;bluetooth-applet;
+RequiredProviders=windowmanager;
+DefaultProvider-windowmanager=awesome

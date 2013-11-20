@@ -1,0 +1,14 @@
+### Gconftool shizzle
+gconftool-2 --type bool --set /apps/gnome-terminal/profiles/Default/use_system_font False
+gconftool-2 --type bool --set /apps/gnome-terminal/profiles/Default/use_theme_colors False
+gconftool-2 --type bool --set /apps/gnome-terminal/profiles/Default/scrollback_unlimited True
+gconftool-2 --type bool --set /apps/gnome-terminal/profiles/Default/default_show_menubar False
+{% if ansible_hostname == "po110022634" %}
+gconftool-2 --type string --set /apps/gnome-terminal/profiles/Default/font "Droid Sans Mono 8"
+{% else %}
+gconftool-2 --type string --set /apps/gnome-terminal/profiles/Default/font "Droid Sans Mono 9"
+{% endif %}
+gconftool-2 --type string --set /apps/gnome-terminal/profiles/Default/scrollbar_position "hidden"
+gconftool-2 --type string --set /apps/gnome-terminal/profiles/Default/background_type "transparent"
+gconftool-2 --type string --set /apps/gnome-terminal/profiles/Default/foreground_color "white"
+gconftool-2 --type string --set /apps/gnome-terminal/profiles/Default/background_color "black"

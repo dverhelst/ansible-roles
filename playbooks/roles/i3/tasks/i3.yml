@@ -1,0 +1,32 @@
+---
+- name: install required packages
+  apt: name={{ item }} state=installed
+  with_items:
+    - i3
+    - xfonts-terminus
+  sudo: True
+
+- name: create directories
+  file: dest=~/.i3/{{ item }} recurse=yes state=directory
+  with_items:
+    - backgrounds
+    - scripts
+
+- name: place config
+  template: src={{ item }}.j2 dest=~/.i3/{{ item }} mode=0755
+  with_items:
+    - config
+    - i3status.conf
+    - scripts/gconf.sh
+
+- name: place background
+  copy: src={{ item }} dest=~/.i3/backgrounds/{{ item }}
+  with_items:
+    - wallpaper-bloem.jpg
+
+- name: place helper-scripts
+  copy: src={{ item }} dest=~/.i3/scripts/{{ item }} mode=0755
+  with_items:
+    - i3status.sh
+    - spotify.sh
+    - spotify_cmd

@@ -1,0 +1,67 @@
+---
+- name: install python-pycurl for ppa
+  apt: name=python-pycurl state=latest
+  sudo: True
+
+- name: add awesome ppa
+  apt_repository: repo='ppa:klaus-vormweg/awesome'
+  sudo: True
+
+- name: install awesomewm
+  apt: name={{ item }} state=latest update_cache=yes
+  sudo: True
+  with_items:
+    - alsa-utils
+    - awesome
+    - awesome-extra
+    - curl
+    - git
+    - gnome-session-fallback
+    - imagemagick
+    - liblua5.2-0
+    - lua-lgi
+    - notification-daemon
+    - xfce4-power-manager
+    - xfce4-power-manager-plugins
+    - fonts-droid
+    - xscreensaver
+    - xscreensaver-data
+    - xscreensaver-gl
+    - xscreensaver-gl-extra
+
+- name: copy awesome.desktop
+  copy: src=awesome.desktop dest=/usr/share/applications/awesome.desktop owner=root group=root mode=0644
+  sudo: True
+
+- name: copy awesome.session
+  copy: src=awesome.session dest=/usr/share/gnome-session/sessions/awesome.session owner=root group=root mode=0644
+  sudo: True
+
+- name: copy awesome-gnome-session.desktop
+  copy: src=awesome-gnome-session.desktop dest=/usr/share/xsessions/awesome-gnome-session.desktop owner=root group=root mode=0644
+  sudo: True
+
+- name: place nvidia-brightness-settings when on laptop
+  copy: src=10-nvidia-brightness.conf dest=/usr/share/X11/xorg.conf.d/10-nvidia-brightness.conf owner=root group=root mode=0644
+  when: ansible_hostname == "perzik"
+  sudo: True
+
+- name: create dirs for awesome
+  file: dest=~/{{ item }} state=directory owner={{ ansible_user_id }} recurse=yes
+  with_items:
+    - .config
+
+- name: fetch awesome-copycats
+  git: repo=https://github.com/copycat-killer/awesome-copycats.git dest=~/.config/awesome update=yes
+
+- name: set theme
+  file: src=~/.config/awesome/rc.lua.{{ awesome.theme }} dest=~/.config/awesome/rc.lua state=link
+
+- name: set terminal to gnome-terminal
+  lineinfile: dest=~/.config/awesome/rc.lua.{{ awesome.theme }} regexp='^terminal' line='terminal   = "gnome-terminal" or "xterm"' state=present
+
+- name: nr of tags
+  lineinfile: dest=~/.config/awesome/rc.lua.{{ awesome.theme }} regexp='^   layout =' line='   layout = { layouts[1], layouts[2], layouts[3], layouts[1], layouts[4], layouts[1], layouts[4], layouts[2], layouts[1] }' state=present
+
+- name: name tags
+  lineinfile: dest=~/.config/awesome/rc.lua.{{ awesome.theme }} regexp='^   names =' line='   names = { "1", "2", "3", "4", "5", "6", "7", "8", "9"},' state=present
