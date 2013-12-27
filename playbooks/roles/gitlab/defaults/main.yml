@@ -1,0 +1,14 @@
+---
+gitlab:
+  db:
+    name: gitlabhq_production
+    host: localhost
+    user: gitlabuser
+    pass: gitlabpass
+  group:
+    name: git
+    gid: 8000
+  user:
+    name: git
+    uid: 8000
+    full: GitLab

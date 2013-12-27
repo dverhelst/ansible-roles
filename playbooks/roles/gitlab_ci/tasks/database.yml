@@ -1,0 +1,6 @@
+---
+- name: create db for gitlab_ci
+  action: mysql_db name={{ gitlab_ci.db.name }} login_host={{ gitlab_ci.db.host }} state=present 
+
+- name: create dbuser for gitlab
+  action: mysql_user name={{ gitlab_ci.db.user }} login_host={{ gitlab_ci.db.host }} host={{ gitlab_ci.db.host }} password={{ gitlab_ci.db.pass }} priv={{ gitlab_ci.db.name }}.*:ALL state=present

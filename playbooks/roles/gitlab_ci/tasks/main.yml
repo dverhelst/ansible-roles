@@ -1,0 +1,17 @@
+---
+- include: packages.yml
+
+- include: database.yml
+
+- name: add gitlab_ci user
+  user: name={{ gitlab_ci.user.name }} comment='{{ gitlab_ci.user.full }}' uid={{ gitlab_ci.user.uid }}
+
+- name: add gitlab_ci group
+  group: name={{ gitlab_ci.user.name }} gid={{ gitlab_ci.user.uid }}
+
+- name: fix permissions when needed
+  file: dest=~{{ gitlab_ci.user.name }} owner={{ gitlab_ci.user.name }} recurse=yes state=directory
+
+- include: gitlab_ci.yml
+
+- include: nginx.yml

@@ -1,0 +1,10 @@
+---
+- name: add gitlab_ci_runner user
+  user: name={{ gitlab_ci_runner.user.name }} comment='{{ gitlab_ci_runner.user.full }}' uid={{ gitlab_ci_runner.user.uid }}
+
+- name: add gitlab_ci_runner group
+  group: name={{ gitlab_ci_runner.user.name }} gid={{ gitlab_ci_runner.user.uid }}
+
+- include: packages.yml
+
+- include: gitlab_ci_runner.yml

@@ -1,0 +1,13 @@
+---
+- name: install python-pycurl for ppa's
+  apt: name=python-pycurl state=installed
+
+- include: packages.yml
+
+- include: gitlab-shell.yml
+
+- include: database.yml
+
+- include: gitlab.yml
+
+- include: nginx.yml

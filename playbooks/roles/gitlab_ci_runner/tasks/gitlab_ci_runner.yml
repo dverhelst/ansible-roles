@@ -1,0 +1,26 @@
+---
+- name: clone gitlab_ci_runner repo
+  git: repo=https://github.com/gitlabhq/gitlab-ci-runner.git dest=/home/{{ gitlab_ci_runner.user.name }}/gitlab-ci-runner update=no
+  sudo_user: ${gitlab_ci_runner.user.name}
+
+- name: run bundle install
+  shell: bundle install > /home/{{ gitlab_ci_runner.user.name }}/gitlab-ci-runner/.bundle_install chdir=/home/{{ gitlab_ci_runner.user.name }}/gitlab-ci-runner creates=/home/{{ gitlab_ci_runner.user.name }}/gitlab-ci-runner/.bundle_install
+
+- name: run bundle setup
+  shell: CI_SERVER_URL=https://{{ gitlab_ci.fqdn }} REGISTRATION_TOKEN={{ gitlab_ci_runner.token }} bundle exec ./bin/setup > /home/{{ gitlab_ci_runner.user.name }}/gitlab-ci-runner/.bundle_setup chdir=/home/{{ gitlab_ci_runner.user.name }}/gitlab-ci-runner creates=/home/{{ gitlab_ci_runner.user.name }}/gitlab-ci-runner/.bundle_setup
+  sudo_user: ${gitlab_ci_runner.user.name}
+
+- name: Install init-script
+  shell: cp /home/{{ gitlab_ci_runner.user.name }}/gitlab-ci-runner/lib/support/init.d/gitlab_ci_runner /etc/init.d/gitlab_ci_runner creates=/etc/init.d/gitlab_ci_runner
+
+- name: make sure initscript is executable
+  file: dest=/etc/init.d/gitlab_ci_runner owner=root group=root mode=0755
+
+- name: enable service gitlab_ci_runner
+  service: name=gitlab_ci_runner state=started enabled=yes
+
+- name: create .ssh dir
+  file: dest=~{{ gitlab_ci_runner.user.name }}/.ssh/ owner={{ gitlab_ci_runner.user.name }} group={{ gitlab_ci_runner.user.name }} mode=0700 state=directory
+
+- name: disable stricthostkeychecking
+  template: src=ssh_config dest=~{{ gitlab_ci_runner.user.name }}/.ssh/config owner={{ gitlab_ci_runner.user.name }} group={{ gitlab_ci_runner.user.name }} mode=0644

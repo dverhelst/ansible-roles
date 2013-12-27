@@ -1,0 +1,42 @@
+---
+- name: clone gitlab_ci repo
+  git: repo=https://github.com/gitlabhq/gitlab-ci.git dest=/home/{{ gitlab_ci.user.name }}/gitlab-ci version="3-2-stable" update=no
+  sudo_user: ${gitlab_ci.user.name}
+
+- name: template configuration
+  template: src={{ item }}.j2 dest=~{{ gitlab_ci.user.name }}/gitlab-ci/config/{{ item }} owner={{ gitlab_ci.user.name }} group={{ gitlab_ci.user.name }} 
+  with_items:
+    - application.yml
+    - puma.rb
+    - database.yml
+
+- name: create directories
+  file: dest=~{{ gitlab_ci.user.name }}/gitlab-ci/tmp/{{ item }} owner={{ gitlab_ci.user.name }} group={{ gitlab_ci.user.name }} mode=0775 recurse=yes state=directory
+  with_items:
+    - sockets
+    - pids
+
+- name: switch gemfile to httpsource to make sure idempotency works ( gems quite unstable IMHO )
+  lineinfile: dest=~{{ gitlab_ci.user.name }}/gitlab-ci/Gemfile regexp='^source.*' value='source "http://rubygems.org"' state=present
+  sudo_user: ${gitlab_ci.user.name}
+
+- name: run bundle install with mysql
+  shell: bundle install --without development test postgres --deployment > ~{{ gitlab_ci.user.name }}/gitlab-ci/.bundle_installed chdir=/home/{{ gitlab_ci.user.name }}/gitlab-ci creates=/home/{{ gitlab_ci.user.name }}/gitlab-ci/.bundle_installed
+  sudo_user: ${gitlab_ci.user.name}
+
+- name: initialise DB
+  shell: bundle exec rake db:setup RAILS_ENV=production > ~{{ gitlab_ci.user.name }}/gitlab-ci/.bundle_dbsetup chdir=/home/{{ gitlab_ci.user.name }}/gitlab-ci creates=/home/{{ gitlab_ci.user.name }}/gitlab-ci/.bundle_dbsetup
+  sudo_user: ${gitlab_ci.user.name}
+
+- name: Setup schedules
+  shell: bundle exec whenever -w RAILS_ENV=production > ~{{ gitlab_ci.user.name }}/gitlab-ci/.bundle_schedules chdir=/home/{{ gitlab_ci.user.name }}/gitlab-ci creates=/home/{{ gitlab_ci.user.name }}/gitlab-ci/.bundle_schedules
+  sudo_user: ${gitlab_ci.user.name}
+
+- name: Install init-script
+  shell: cp /home/{{ gitlab_ci.user.name }}/gitlab-ci/lib/support/init.d/gitlab_ci /etc/init.d/gitlab_ci creates=/etc/init.d/gitlab_ci
+
+- name: make sure initscript is executable
+  file: dest=/etc/init.d/gitlab_ci owner=root group=root mode=0755
+
+- name: enable service gitlab_ci
+  service: name=gitlab_ci state=started enabled=yes

@@ -1,0 +1,41 @@
+---
+- name: Install required packages
+  apt: name={{ item }} state=installed 
+  with_items:
+    - build-essential
+    - curl
+    - gcc
+    - git-core
+    - libc6-dev
+    - libcurl4-openssl-dev
+    - libicu-dev
+    - libpq-dev
+    - libreadline6-dev
+    - libssl-dev
+    - libxml2-dev
+    - libxslt1-dev
+    - libyaml-dev
+    - make
+    - maven
+    - openjdk-7-jdk
+    - ruby
+    - ruby-dev
+    - rubygems
+    - wget
+    - zlib1g-dev
+
+- name: install bundler gem
+  gem: name=bundler version=1.3.5 state=present user_install=no
+  sudo: True
+
+- name: install addressable gem
+  gem: name=addressable version=2.3.4 state=present user_install=yes
+  sudo_user: ${gitlab_ci_runner.user.name}
+
+- name: install various build gems
+  gem: name={{ item }} state=present user_install=yes
+  with_items:
+    - cabin
+    - fpm
+    - backports
+  sudo_user: ${gitlab_ci_runner.user.name}

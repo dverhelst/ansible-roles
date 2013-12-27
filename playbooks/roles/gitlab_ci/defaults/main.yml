@@ -1,0 +1,11 @@
+---
+gitlab_ci:
+  db:
+    name: gitlab_ci_production
+    host: localhost
+    user: gitlabci
+    pass: icbaltig
+  user:
+    name: gitlab_ci
+    uid: 8001
+    full: GitLab CI

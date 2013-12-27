@@ -1,0 +1,17 @@
+---
+- name: add gitlab group
+  group: name={{ gitlab.group.name }} gid={{ gitlab.group.gid }}
+
+- name: add gitlab user
+  user: name={{ gitlab.user.name }} comment='{{ gitlab.user.full }}' group={{ gitlab.group.name }} uid={{ gitlab.user.uid }} shell="/bin/bash"
+
+- name: clone gitlab-shell repo
+  git: repo=https://github.com/gitlabhq/gitlab-shell.git dest=/home/{{ gitlab.user.name }}/gitlab-shell version="v1.7.1" update=no
+  sudo_user: ${gitlab.user.name}
+
+- name: template config.yml for gitlab-shell
+  template: src=config.yml.j2 dest=/home/{{ gitlab.user.name }}/gitlab-shell/config.yml owner=git group=git
+
+- name: install gitlab-shell
+  command: /home/{{ gitlab.user.name }}/gitlab-shell/bin/install creates=/home/{{ gitlab.user.name }}/repositories
+  sudo_user: ${gitlab.user.name}

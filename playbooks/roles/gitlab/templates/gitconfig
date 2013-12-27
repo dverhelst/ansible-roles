@@ -1,0 +1,6 @@
+[user]
+  name = {{ gitlab.user.full }}
+  email = {{ gitlab.email }}
+[core]
+  autocrlf = input
+

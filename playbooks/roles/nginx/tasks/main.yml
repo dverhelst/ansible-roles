@@ -1,0 +1,16 @@
+---
+- name: install nginx
+  action: ${ansible_pkg_mgr} name=nginx state=present
+
+- name: create ssl-dir for nginx
+  file: dest=/etc/nginx/ssl state=directory
+
+- name: generate private-key
+  command: openssl req -new -nodes -x509 -subj "/C=BE/ST=WVL/L=Belgium/O=IT/CN=${ansible_fqdn}" -days 3650 -keyout /etc/nginx/ssl/server.key -out /etc/nginx/ssl/server.crt -extensions v3_ca creates=/etc/nginx/ssl/server.crt
+
+- name: create default hosts
+  template: src=site_default.j2 dest=/etc/nginx/sites-available/default
+  notify: restart nginx
+
+- name: start nginx
+  service: name=nginx state=started enabled=yes

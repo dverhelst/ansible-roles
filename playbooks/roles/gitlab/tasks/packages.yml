@@ -1,0 +1,41 @@
+---
+- name: add ppa for git 
+  apt_repository: repo='ppa:pdoes/ppa'
+  when: ansible_distribution_release == "precise"
+
+- name: add ppa for ruby2.0
+  apt_repository: repo='ppa:brightbox/ruby-ng-experimental'
+
+- name: remove unwanted packages
+  apt: name={{ item }} state=removed
+  with_items:
+    - ruby1.8
+    - ruby1.9.1
+    - ruby1.9.3
+
+- name: install packages
+  apt: name={{ item }} state=latest update_cache=yes
+  with_items:
+    - automake
+    - curl
+    - g++
+    - git
+    - git-core
+    - libicu-dev
+    - libmysqlclient-dev
+    - libxml2-dev
+    - libxslt1-dev
+    - make
+    - openssh-server
+    - python
+    - python-docutils
+    - python-pycurl
+    - ruby2.0
+    - ruby2.0-dev
+    - vim
+
+- name: install bundler gem
+  gem: name=bundler version=1.3.5 state=present user_install=no
+
+- name: install charlock_holmes gem
+  gem: name=charlock_holmes version=0.6.9.4 state=present user_install=no

@@ -1,0 +1,14 @@
+---
+- name: place nginx config 
+  template: src=nginx.gitlab.j2 dest=/etc/nginx/sites-available/{{ gitlab.fqdn }}
+
+- name: generate ssl-key
+  command: openssl req -new -nodes -x509 -subj "/C=BE/ST=WVL/L=Belgium/O=IT/CN=${gitlab.fqdn}" -days 3650 -keyout /etc/nginx/ssl/{{ gitlab.fqdn }}.key -out /etc/nginx/ssl/{{ gitlab.fqdn }}.crt -extensions v3_ca creates=/etc/nginx/ssl/{{ gitlab.fqdn }}.crt
+
+- name: enable vhost
+  file: src=/etc/nginx/sites-available/{{ gitlab.fqdn }} dest=/etc/nginx/sites-enabled/{{ gitlab.fqdn }} state=link
+  notify: restart nginx
+
+- name: place www-data in gitlab group
+  user: name=www-data groups="{{ gitlab.group.name }}"
+  notify: restart nginx

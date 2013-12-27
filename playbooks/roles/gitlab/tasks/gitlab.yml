@@ -1,0 +1,45 @@
+---
+- name: clone gitlab repo
+  git: repo=https://github.com/gitlabhq/gitlabhq.git dest=/home/{{ gitlab.user.name }}/gitlab version="6-2-stable" update=no
+  sudo_user: ${gitlab.user.name}
+
+- name: configure gitlab 
+  template: src={{ item }}.j2 dest=/home/{{ gitlab.user.name }}/gitlab/config/{{ item }} owner={{ gitlab.user.name }} mode=0700
+  with_items:
+    - gitlab.yml
+    - unicorn.rb
+    - database.yml
+
+- name: create directories
+  file: path=/home/{{ gitlab.user.name }}/{{ item }} owner={{ gitlab.user.name }} group={{ gitlab.group.name }} recurse=yes mode=0775 state=directory
+  with_items:
+    - gitlab/log
+    - gitlab/public/uploads
+    - gitlab/tmp
+    - gitlab/tmp/pids
+    - gitlab/tmp/sockets
+    - gitlab-satellites
+
+- name: configure git
+  template: src=gitconfig dest=/home/{{ gitlab.user.name }}/.gitconfig owner={{ gitlab.user.name }} group={{ gitlab.group.name }}
+
+- name: switch gemfile to httpsource to make sure idempotency works ( gems quite unstable IMHO )
+  lineinfile: dest=/home/{{ gitlab.user.name }}/gitlab/Gemfile regexp='^source.*' value='source "http://rubygems.org"' state=present
+  sudo_user: ${gitlab.user.name}
+
+- name: run bundle install with mysql
+  shell: bundle install --deployment --without development test postgres aws > /home/{{ gitlab.user.name }}/gitlab/.bundle_installed chdir=/home/{{ gitlab.user.name }}/gitlab creates=/home/{{ gitlab.user.name }}/gitlab/.bundle_installed
+  sudo_user: ${gitlab.user.name}
+
+- name: run install db
+  shell: yes 'yes' | bundle exec rake gitlab:setup RAILS_ENV=production > /home/{{ gitlab.user.name }}/gitlab/.gitdb_installed chdir=/home/{{ gitlab.user.name}}/gitlab creates=/home/{{ gitlab.user.name }}/gitlab/.gitdb_installed
+  sudo_user: ${gitlab.user.name}
+
+- name: copy init-script for Ubuntu
+  shell: cp /home/{{ gitlab.user.name }}/gitlab/lib/support/init.d/gitlab /etc/init.d/gitlab creates=/etc/init.d/gitlab
+
+- name: copy logrotate 
+  shell: cp /home/{{ gitlab.user.name }}/gitlab/lib/support/logrotate/gitlab /etc/logrotate.d/gitlab creates=/etc/logrotate.d/gitlab
+
+- name: enable service gitlab
+  service: name=gitlab state=started enabled=yes

@@ -1,0 +1,6 @@
+gitlab_ci_runner:
+  user:
+    name: gitlab_ci_runner
+    uid: 8002
+    full: GitLab CI Runner
+

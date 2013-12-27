@@ -1,0 +1,18 @@
+- name: Install Gitlab
+  hosts: gitlab_host
+  user: dieter
+
+  vars:
+    gitlab:
+      email: git@some_domain.com
+      fqdn: git.some_domain.com
+    gitlab_ci:
+      email: ci@some_domain.com
+      fqdn: ci.some_domain.com
+    gitlab_ci_runner:
+      token: 4ebd9f7efcc7845646b5
+
+  roles:
+    - { role: gitlab, when: ansible_distribution == "Ubuntu" }
+    - { role: gitlab_ci, when: ansible_distribution == "Ubuntu" }
+    - { role: gitlab_ci_runner, when: ansible_distribution == "Ubuntu" }

@@ -1,0 +1,28 @@
+---
+- name: install bundler gem
+  gem: name=bundler version=1.3.5 state=present user_install=no
+  sudo: True
+
+- name: install packages
+  apt: name={{ item }} state=latest update_cache=yes
+  with_items:
+    - wget
+    - curl
+    - gcc
+    - checkinstall
+    - libxml2-dev
+    - libxslt1-dev
+    - libcurl4-openssl-dev
+    - libreadline6-dev
+    - libc6-dev
+    - libssl-dev
+    - libmysql++-dev
+    - make
+    - build-essential
+    - zlib1g-dev
+    - openssh-server 
+    - git-core
+    - libyaml-dev
+    - libpq-dev
+    - libicu-dev
+  sudo: True
