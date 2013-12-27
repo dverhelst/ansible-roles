@@ -1,0 +1,4 @@
+---
+- name: install postfix
+  yum: name=postfix state=installed
+  sudo: True

@@ -1,0 +1,7 @@
+---
+- name: install postfix
+  apt: name={{ item }} state=installed
+  sudo: True
+  with_items:
+    - postfix
+    - mailutils

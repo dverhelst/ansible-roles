@@ -1,0 +1,4 @@
+---
+- name: install redis-server
+  action: ${ansible_pkg_mgr} name=redis-server state=installed
+  notify: start redis-server
